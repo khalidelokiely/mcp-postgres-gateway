@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres-gateway-db:
+    image: postgres:15-alpine
+    container_name: mcp_postgres_db
+    environment:
+      POSTGRES_USER: engine_user
+      POSTGRES_PASSWORD: secure_gate_password
+      POSTGRES_DB: domainai_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infrastructure/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U engine_user -d domainai_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
