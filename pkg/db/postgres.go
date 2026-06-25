@@ -2,10 +2,9 @@ package db
 
 import (
 	"database/sql"
-
-	_ "github.com/lib/pq"
 )
 
+// ColumnMetadata defines a single column in our postgres database
 type ColumnMetadata struct {
 	TableName  string
 	ColumnName string
@@ -13,15 +12,15 @@ type ColumnMetadata struct {
 }
 
 // InspectExposedSchema reads structural layout data dynamically from the system catalog.
-func InspectExposedSchema(db *sql.DB) ([]ColumnMetadata, error) {
+func InspectExposedSchema(db *sql.DB, exposedTables []string) ([]ColumnMetadata, error) {
 	query := `
 		SELECT table_name, column_name, data_type 
 		FROM information_schema.columns 
 		WHERE table_schema = 'public' 
-		AND table_name IN ('compounds', 'sales_ledger')
+		AND table_name = ANY($1)
 		ORDER BY table_name, column_name;`
 
-	rows, err := db.Query(query)
+	rows, err := db.Query(query, exposedTables)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +33,10 @@ func InspectExposedSchema(db *sql.DB) ([]ColumnMetadata, error) {
 			return nil, err
 		}
 		metadata = append(metadata, col)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return metadata, nil

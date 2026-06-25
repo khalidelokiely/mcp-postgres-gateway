@@ -52,5 +52,9 @@ func (q *Queries) FindRegionalMetrics(ctx context.Context, regions []string) ([]
 		result = append(result, col)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }

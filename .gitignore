@@ -1,1 +1,4 @@
+.idea/
+mcp-gateway
+*.exe
 .env

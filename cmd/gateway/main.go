@@ -8,6 +8,7 @@ import (
 	"log"
 	"mcp-postgres-gateway/pkg/db"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq" // CRITICAL: Must be explicitly imported here to register the driver
 	"github.com/mark3labs/mcp-go/mcp"
@@ -21,7 +22,17 @@ func formatResult(v any) string {
 
 func main() {
 	// Initialize Postgres Connection
-	connStr := "host=localhost port=5432 user=postgres password=secret dbname=sprint_analytics sslmode=disable"
+	connStr := os.Getenv("DATABASE_URL")
+
+	exposedTables := strings.Split(os.Getenv("EXPOSED_TABLES"), ",")
+	if len(exposedTables) == 0 {
+		log.Fatal("EXPOSED_TABLES environment variable is not set")
+	}
+
+	if connStr == "" {
+		log.Fatal("DATABASE_URL environment variable is not set")
+	}
+
 	database, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Database initialization failure: %v", err)
@@ -37,17 +48,12 @@ func main() {
 	)
 
 	s.AddTool(listTablesTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		cols, err := db.InspectExposedSchema(database)
+		cols, err := db.InspectExposedSchema(database, exposedTables)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to map system constraints: %s", err.Error())), nil
 		}
 
-		var schemaSummary string
-		for _, col := range cols {
-			schemaSummary += fmt.Sprintf("Table: %s | Field: %s (%s)\n", col.TableName, col.ColumnName, col.DataType)
-		}
-
-		return mcp.NewToolResultText(schemaSummary), nil
+		return mcp.NewToolResultText(formatResult(cols)), nil
 	})
 
 	// Data tools
