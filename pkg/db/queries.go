@@ -19,9 +19,9 @@ func NewQueries(db *sql.DB) *Queries {
 
 type RegionalMetricsResult struct {
 	Region          string  `json:"region"`
-	UnitsSold       int     `json:"unitsSold"`
-	TotalRevenue    float64 `json:"totalRevenue"`
-	CancelledOrders int     `json:"cancelledOrders"`
+	UnitsSold       int     `json:"units_sold"`
+	TotalRevenue    float64 `json:"total_revenue"`
+	CancelledOrders int     `json:"cancelled_orders"`
 }
 
 func (q *Queries) FindRegionalMetrics(ctx context.Context, regions []string) ([]RegionalMetricsResult, error) {

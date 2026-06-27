@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq" // CRITICAL: Must be explicitly imported here to register the driver
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -21,6 +22,7 @@ func formatResult(v any) string {
 }
 
 func main() {
+	err := godotenv.Load(".env")
 	// Initialize Postgres Connection
 	connStr := os.Getenv("DATABASE_URL")
 

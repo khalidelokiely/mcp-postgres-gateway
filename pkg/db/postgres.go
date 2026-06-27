@@ -6,9 +6,9 @@ import (
 
 // ColumnMetadata defines a single column in our postgres database
 type ColumnMetadata struct {
-	TableName  string
-	ColumnName string
-	DataType   string
+	TableName  string `json:"table_name"`
+	ColumnName string `json:"column_name"`
+	DataType   string `json:"data_type"`
 }
 
 // InspectExposedSchema reads structural layout data dynamically from the system catalog.
